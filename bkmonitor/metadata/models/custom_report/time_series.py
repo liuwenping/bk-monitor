@@ -1290,7 +1290,11 @@ class TimeSeriesScope(models.Model):
                 continue
 
             field_scope = metric_info.get("field_scope", TimeSeriesMetric.DEFAULT_DATA_SCOPE_NAME)
-            tag_list = metric_info.get("tag_value_list") or metric_info.get("tag_list") or {}
+            # 判断传入数据是否包含 values (tag_value_list/tag_list)
+            if "tag_value_list" in metric_info:
+                tag_list = list(metric_info["tag_value_list"].keys())
+            else:
+                tag_list = [tag["field_name"] for tag in metric_info.get("tag_list", [])]
 
             scope_name = existing_metric_scope_map.get((field_name, field_scope))
             if not scope_name:
@@ -1304,7 +1308,7 @@ class TimeSeriesScope(models.Model):
                 scope_name_to_dimensions[scope_name]["create_from_default"] = create_from_default
 
             scope_name_to_metrics[scope_name].append(metric_info)
-            scope_name_to_dimensions[scope_name]["dimensions"].update(tag_list.keys())
+            scope_name_to_dimensions[scope_name]["dimensions"].update(tag_list)
 
         # 检查并补充缺失的默认分组
         checked_prefixes = set()
