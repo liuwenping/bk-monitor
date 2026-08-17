@@ -740,19 +740,18 @@ class Application(AbstractRecordModel):
         if not to_grant:
             return normalized_new
 
-        permission = Permission()
         app_resource = ResourceEnum.APM_APPLICATION.create_simple_instance(
             self.application_id, {"bk_biz_id": self.bk_biz_id}
         )
         biz_resource = ResourceEnum.BUSINESS.create_simple_instance(self.bk_biz_id)
         for user in to_grant:
             try:
-                permission.grant_creator_action(app_resource, creator=user)
+                Permission().grant_creator_action(app_resource, creator=user)
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning(f"application->({self.application_id}) grant owner({user}) action failed, reason: {e}")
             try:
                 # 前端 APM 页面入口校验 view_business，仅有应用权限无法进入业务
-                permission.grant_creator_action(biz_resource, creator=user)
+                Permission().grant_creator_action(biz_resource, creator=user)
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning(
                     f"application->({self.application_id}) grant owner({user}) "
